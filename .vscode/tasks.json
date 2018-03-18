@@ -1,0 +1,26 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "/usr/bin/dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}/Jint.CommonJS.Tests/Jint.CommonJS.Tests.csproj"
+            ],
+            "options": {
+                "shell": {
+                    "executable": "/bin/bash",
+                    "args": [
+                        "-c"
+                    ]
+                },
+                "env": {
+                    "BASH_ENV": "/home/tw/.vscode-workaround"
+                }
+            },
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
