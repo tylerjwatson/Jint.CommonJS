@@ -4,6 +4,17 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup>
+<!--       <id>Jint.CommonJS</id> -->
+        <Version></Version>
+        <Description>A CommonJS implementation for the Jint .NET JavaScript engine</Description>
+        <Authors>Tyler Watson</Authors>
+        <PackageProjectUrl>https://github.com/tylerjwatson/Jint.CommonJS</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/tylerjwatson/Jint.CommonJS</RepositoryUrl>
+        <PackageLicenseUrl>https://raw.githubusercontent.com/tylerjwatson/Jint.CommonJS/master/LICENSE</PackageLicenseUrl>
+        <PackageTags>jint,commonjs,module</PackageTags>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="jint" Version="2.11.58" />
   </ItemGroup>
