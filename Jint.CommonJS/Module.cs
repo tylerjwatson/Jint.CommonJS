@@ -9,7 +9,7 @@ using Jint.Native.Object;
 using Jint.Runtime;
 using Jint.Runtime.Interop;
 
-namespace Jint.ModuleLoader
+namespace Jint.CommonJS
 {
 
     public class Module
@@ -69,6 +69,8 @@ namespace Jint.ModuleLoader
             string extension = Path.GetExtension(this.filePath);
             var loader = this.engine.FileExtensionParsers[extension] ?? this.engine.FileExtensionParsers["default"];
 
+            e.ModuleCache.Add(this.id, this);
+
             loader(this.filePath, this);
         }
         
@@ -88,7 +90,8 @@ namespace Jint.ModuleLoader
                     JsValue.FromObject(this.engine.engine, this),
                     this.exports,
                     Path.GetDirectoryName(filePath),
-                     new DelegateWrapper(engine.engine, new Func<string, JsValue>(this.Require)),
+                    new ClrFunctionInstance(this.engine.engine, (thisObj, arguments) => Require(arguments.At(0).AsString()))
+                    //  new DelegateWrapper(engine.engine, new Func<string, JsValue>(this.Require)),
                     }
                 );
 

@@ -6,7 +6,7 @@ using System.Linq;
 using Jint.Native;
 using Jint.Native.Object;
 
-namespace Jint.ModuleLoader
+namespace Jint.CommonJS
 {
 
     public class ModuleLoadingEngine

@@ -1,5 +1,5 @@
 
-namespace Jint.ModuleLoader
+namespace Jint.CommonJS
 {
     public static class EngineExtensions
     {
