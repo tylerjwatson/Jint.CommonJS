@@ -1,5 +1,7 @@
 # Jint.CommonJS
 
+What's a GitHub project without build badges? [![Build status](https://ci.appveyor.com/api/projects/status/eqxh6wt0gx7fdi04/branch/master?svg=true&retina=true)](https://ci.appveyor.com/project/tylerjwatson/jint-commonjs/branch/master)
+
 Jint.CommonJS is an extremely simple CommonJS-compatible module loader for the [Jint .NET Javascript Engine](https://github.com/sebastienros/jint).  It's written in .NET core 2.0 and should be compatible with all .NET frameworks that Jint targets.  It allows you to require JavaScript modules from other modules in the Jint interpreter using the familiar `require` function we all know and love.
 
 Every loaded module is wrapped in the following closure:
