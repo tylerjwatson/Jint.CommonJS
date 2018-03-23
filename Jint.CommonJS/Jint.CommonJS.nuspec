@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <!-- Required elements-->
+        <id>Jint.CommonJS</id>
+        <version>1.0.0</version>
+        <description>A CommonJS implementation for the Jint .NET JavaScript engine</description>
+        <authors>Tyler Watson</authors>
+        <language>en-US</language>
+        <projectUrl>https://github.com/tylerjwatson/Jint.CommonJS</projectUrl>
+        <licenseUrl>https://raw.githubusercontent.com/tylerjwatson/Jint.CommonJS/master/LICENSE</licenseUrl>
+
+        <!-- Optional elements -->
+        <dependencies>
+            <dependency id="Jint" version="2.11" />
+        </dependencies>
+        <!-- ... -->
+    </metadata>
+    <!-- Optional 'files' node -->
+</package>
