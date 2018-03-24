@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Jint.Native;
 using Jint.Native.Object;
+using Jint.Runtime.Interop;
 
 namespace Jint.CommonJS
 {
@@ -13,7 +14,7 @@ namespace Jint.CommonJS
     {
         public delegate JsValue FileExtensionParser(string path, Module module);
 
-        public Dictionary<string, Module> ModuleCache = new Dictionary<string, Module>();
+        public Dictionary<string, IModule> ModuleCache = new Dictionary<string, IModule>();
         public Dictionary<string, FileExtensionParser> FileExtensionParsers = new Dictionary<string, FileExtensionParser>();
 
         public readonly Engine engine;
@@ -37,15 +38,48 @@ namespace Jint.CommonJS
         private JsValue LoadJS(string path, Module module)
         {
             var sourceCode = File.ReadAllText(path);
-            module.exports = module.Compile(sourceCode, path);
-            return module.exports;
+            module.Exports = module.Compile(sourceCode, path);
+            return module.Exports;
         }
 
         private JsValue LoadJson(string path, Module module)
         {
             var sourceCode = File.ReadAllText(path);
-            module.exports = engine.Json.Parse(JsValue.Undefined, new[] { JsValue.FromObject(this.engine, sourceCode) }).AsObject();
-            return module.exports;
+            module.Exports = engine.Json.Parse(JsValue.Undefined, new[] { JsValue.FromObject(this.engine, sourceCode) }).AsObject();
+            return module.Exports;
+        }
+
+        protected ModuleLoadingEngine RegisterInternalModule(InternalModule mod)
+        {
+            ModuleCache.Add(mod.Id, mod);
+            return this;
+        }
+
+        /// <summary>
+        /// Registers an internal module to the provided delegate handler.
+        /// </summary>
+        public ModuleLoadingEngine RegisterInternalModule(string id, Delegate d)
+        {
+            this.RegisterInternalModule(id, new DelegateWrapper(engine, d));
+            return this;
+        }
+
+        /// <summary>
+        /// Registers an internal module under the specified id to the provided .NET CLR type.
+        /// </summary>
+        public ModuleLoadingEngine RegisterInternalModule(string id, Type clrType)
+        {
+            this.RegisterInternalModule(id, TypeReference.CreateTypeReference(engine, clrType));
+            return this;
+        }
+
+        /// <summary>
+        /// Registers an internal module under the specified id to any JsValue instance.
+        /// </summary>
+        public ModuleLoadingEngine RegisterInternalModule(string id, JsValue value)
+        {
+            this.RegisterInternalModule(new InternalModule(id, value));
+            return this;
         }
 
         public JsValue RunMain(string mainModuleName)
@@ -65,17 +99,15 @@ namespace Jint.CommonJS
                 throw new System.ArgumentException("moduleName is required.", nameof(moduleName));
             }
 
-            Module module = null;
+            IModule module = null;
             if (ModuleCache.ContainsKey(moduleName))
             {
                 module = ModuleCache[moduleName];
-                parent.children.Add(module);
-                return module.exports;
+                parent.Children.Add(module);
+                return module.Exports;
             }
 
-            module = new Module(this, moduleName, parent);
-
-            return module.exports;
+            return new Module(this, moduleName, parent).Exports;
         }
     }
 }

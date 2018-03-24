@@ -28,6 +28,7 @@ The library is MIT licensed.
 * `require` another JavaScript module from a JavaScript file with `require('./module')`
 * `require` JSON with `require('./file.json')`
 * `require` modules from other modules
+* Register internal modules with the `RegisterInternalModule` method
 * A small but succinct unit test suite.
 
 ## Using the library
@@ -59,4 +60,50 @@ public static class Program
 myModule.js
 ```js
 exports.value = require('./myOtherModule');
+```
+
+## Internal Modules
+
+Jint.CommonJS provides an API to register internal modules to any value which Jint supports.  It supports CLR type references, namespace references, and any `JsValue` instance, so you may require a CLR type into your module using the require mechanism.
+
+Both static and instance members are supported when binding CLR types.
+
+### Registering an mscorlib type as a module
+
+```csharp
+var e = new Engine();
+var cjs = e
+    .CommonJS()
+    .RegisterInternalModule("console", typeof(Console))
+    .RunMain("./")
+```
+
+index.js
+```js
+var console = require('console');
+console.WriteLine('Test from System.Console!');
+```
+
+### Registering an internal module to a CLR class
+
+```csharp
+public class MyClass
+{
+    public void Method()
+    {
+
+    }
+}
+
+var cjs = e
+    .CommonJS()
+    .RegisterInternalModule("cls", typeof(MyClass))
+    .RunMain("./")
+```
+
+index.js
+```js
+var cls = require('cls');
+var instance = new cls();
+cls.Method();
 ```

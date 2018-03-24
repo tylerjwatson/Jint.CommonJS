@@ -12,14 +12,12 @@ using Jint.Runtime.Interop;
 namespace Jint.CommonJS
 {
 
-    public class Module
+    public class Module : IModule
     {
         /// <summary>
         /// This module's children
         /// </summary>
-        public List<Module> children = new List<Module>();
-
-        public readonly string id;
+        public List<IModule> Children { get; } = new List<IModule>();
 
         protected Module parentModule;
 
@@ -30,10 +28,12 @@ namespace Jint.CommonJS
         /// </summary>
         public bool isMainModule => this.parentModule == null;
 
+        public string Id { get; set; }
+
         /// <summary>
         /// Contains the module's public API.
         /// </summary>
-        public JsValue exports;
+        public JsValue Exports { get; set; }
 
         public readonly string filePath;
 
@@ -55,31 +55,41 @@ namespace Jint.CommonJS
                 throw new System.ArgumentException("A moduleId is required.", nameof(moduleId));
             }
 
-            this.id = moduleId;
-            this.filePath = e.Resolver.ResolvePath(this.id, this);
+            Id = moduleId;
+            this.filePath = e.Resolver.ResolvePath(Id, this);
             this.parentModule = parent;
 
             if (parent != null)
             {
-                parent.children.Add(this);
+                parent.Children.Add(this);
             }
 
-            this.exports = engine.engine.Object.Construct(new JsValue[] {});
+            this.Exports = engine.engine.Object.Construct(new JsValue[] { });
 
             string extension = Path.GetExtension(this.filePath);
             var loader = this.engine.FileExtensionParsers[extension] ?? this.engine.FileExtensionParsers["default"];
 
-            e.ModuleCache.Add(this.id, this);
+            e.ModuleCache.Add(Id, this);
 
             loader(this.filePath, this);
         }
-        
-        protected JsValue Require(string moduleId) {
+
+        protected JsValue Require(string moduleId)
+        {
             return engine.Load(moduleId, this);
         }
 
         public JsValue Compile(string sourceCode, string filePath)
         {
+            var moduleObject = JsValue.FromObject(this.engine.engine, this);
+
+            // moduleObject.AsObject().DefineOwnProperty("exports", new Runtime.Descriptors.PropertyDescriptor() {
+            //     Get = new ClrFunctionInstance(engine.engine, (thisObj, args) => Exports),
+            //     Set = new ClrFunctionInstance(engine.engine, (thisObj, args) => Exports = args.At(0)),
+            //     Enumerable = true,
+            //     Configurable = true,
+            // }, throwOnError: true);
+
             engine.engine.Execute($@"
                 ;(function (module, exports, __dirname, require) {{
                     {sourceCode}
@@ -87,15 +97,15 @@ namespace Jint.CommonJS
             ").GetCompletionValue().As<FunctionInstance>().Call(
                 JsValue.FromObject(this.engine.engine, this),
                 new JsValue[] {
-                    JsValue.FromObject(this.engine.engine, this),
-                    this.exports,
+                    moduleObject,
+                    this.Exports,
                     Path.GetDirectoryName(filePath),
                     new ClrFunctionInstance(this.engine.engine, (thisObj, arguments) => Require(arguments.At(0).AsString()))
                     //  new DelegateWrapper(engine.engine, new Func<string, JsValue>(this.Require)),
                     }
                 );
 
-                return exports;
+            return Exports;
         }
     }
 
