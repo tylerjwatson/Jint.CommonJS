@@ -11,14 +11,12 @@ namespace Jint.CommonJS
 
         public List<IModule> Children => new List<IModule>();
 
-        public JsValue Exports => exports;
-
-        protected JsValue exports;
+        public JsValue Exports { get; set; }
 
         public InternalModule(string id, JsValue constructor)
         {
-            this.Id = id;
-            exports = constructor;
+            Id = id;
+            Exports = constructor;
         }
     }
 }

@@ -9,6 +9,6 @@ namespace Jint.CommonJS
         string Id { get; set; }
         List<IModule> Children { get; }
 
-        JsValue Exports { get; }
+        JsValue Exports { get; set;}
     }
 }

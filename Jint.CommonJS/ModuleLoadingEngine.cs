@@ -12,7 +12,7 @@ namespace Jint.CommonJS
 
     public class ModuleLoadingEngine
     {
-        public delegate JsValue FileExtensionParser(string path, Module module);
+        public delegate JsValue FileExtensionParser(string path, IModule module);
 
         public Dictionary<string, IModule> ModuleCache = new Dictionary<string, IModule>();
         public Dictionary<string, FileExtensionParser> FileExtensionParsers = new Dictionary<string, FileExtensionParser>();
@@ -35,14 +35,21 @@ namespace Jint.CommonJS
             }
         }
 
-        private JsValue LoadJS(string path, Module module)
+        private JsValue LoadJS(string path, IModule module)
         {
             var sourceCode = File.ReadAllText(path);
-            module.Exports = module.Compile(sourceCode, path);
+            if (module is Module)
+            {
+                module.Exports = (module as Module).Compile(sourceCode, path);
+            }
+            else
+            {
+                module.Exports = engine.Execute(sourceCode).GetCompletionValue();
+            }
             return module.Exports;
         }
 
-        private JsValue LoadJson(string path, Module module)
+        private JsValue LoadJson(string path, IModule module)
         {
             var sourceCode = File.ReadAllText(path);
             module.Exports = engine.Json.Parse(JsValue.Undefined, new[] { JsValue.FromObject(this.engine, sourceCode) }).AsObject();
