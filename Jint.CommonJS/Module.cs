@@ -56,7 +56,7 @@ namespace Jint.CommonJS
             }
 
             Id = moduleId;
-            this.filePath = e.Resolver.ResolvePath(Id, this);
+            this.filePath = e.Resolver.ResolvePath(Id, parent ?? this);
             this.parentModule = parent;
 
             if (parent != null)
