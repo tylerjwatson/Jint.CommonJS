@@ -89,6 +89,15 @@ namespace Jint.CommonJS
             return this;
         }
 
+        /// <summary>
+        /// Registers an internal module to the specified ID to the provided object instance.
+        /// </summary>
+        public ModuleLoadingEngine RegisterInternalModule(string id, object instance)
+        {
+            this.RegisterInternalModule(id, JsValue.FromObject(this.engine, instance));
+            return this;
+        }
+
         public JsValue RunMain(string mainModuleName)
         {
             if (string.IsNullOrWhiteSpace(mainModuleName))

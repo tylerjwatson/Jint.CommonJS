@@ -62,4 +62,25 @@ public class InternalModuleTests
          
          Assert.Equal("test delegate value", exports.AsString());
     }
+
+    public void ItSupportsObjectInstances()
+    {
+        Directory.SetCurrentDirectory(Path.GetTempPath());
+
+        File.WriteAllText("ItSupportsObjectInstances.js", @"
+            module.exports = require('objectInstance');
+        ");
+
+        var testObject = new {
+            test = "test value"
+        };
+
+        var engine = new Engine();
+        var exports = engine
+            .CommonJS()
+            .RegisterInternalModule("objectInstance", testObject)
+            .RunMain("./ItSupportsObjectInstances");
+
+        Assert.Equal("test value", exports.AsObject().Get("test").AsString());
+    }
 }
