@@ -5,6 +5,7 @@ using Jint.CommonJS;
 using Jint.Runtime.Interop;
 using System.IO;
 using System;
+using Jint.Native;
 
 public class InternalModuleTests
 {
@@ -59,10 +60,11 @@ public class InternalModuleTests
             .CommonJS()
             .RegisterInternalModule("func", new Func<string>(() => "test delegate value"))
             .RunMain("./ItSupportsDelegates");
-         
-         Assert.Equal("test delegate value", exports.AsString());
+
+        Assert.Equal("test delegate value", exports.AsString());
     }
 
+    [Fact(DisplayName = "It supports Object Instances")]
     public void ItSupportsObjectInstances()
     {
         Directory.SetCurrentDirectory(Path.GetTempPath());
@@ -71,7 +73,8 @@ public class InternalModuleTests
             module.exports = require('objectInstance');
         ");
 
-        var testObject = new {
+        var testObject = new
+        {
             test = "test value"
         };
 
@@ -83,4 +86,50 @@ public class InternalModuleTests
 
         Assert.Equal("test value", exports.AsObject().Get("test").AsString());
     }
+
+    [Fact(DisplayName = "It raises the ModuleRequested event when being asked for an internal module not in the cache")]
+    public void ItRaisesTheModuleRequestedEvent()
+    {
+        var engine = new Engine().CommonJS();
+        var testModuleName = "TestModule";
+
+        Directory.SetCurrentDirectory(Path.GetTempPath());
+
+        File.WriteAllText("ModuleRequestedEvent.js", $@"
+            module.exports = require('{testModuleName}');
+        ");
+
+        var eventData = Assert.RaisesAny<ModuleRequestedEventArgs>(e => engine.ModuleRequested += e, e => engine.ModuleRequested -= e, () => {
+            // An exception is expected here; the RaisesAny method does not assign the exports a value.
+            Assert.Throws<FileNotFoundException>(() => engine.RunMain("./ModuleRequestedEvent"));
+        });
+
+        Assert.Equal(testModuleName, eventData.Arguments.ModuleId);
+    }
+
+    [Fact]
+    public void ItLoadsModulesFromTheModuleRequestedEventHandler()
+    {
+        Directory.SetCurrentDirectory(Path.GetTempPath());
+
+        var engine = new Engine().CommonJS();
+        var testModuleName = "TestModule";
+
+        File.WriteAllText("ModuleRequestedEvent2.js", $@"
+            module.exports = require('{testModuleName}');
+        ");
+
+        engine.ModuleRequested += (sender, args) => {
+            if (args.ModuleId == testModuleName)
+            {
+                args.Exports = JsValue.FromObject(engine.engine, "test value");
+            }
+        };
+
+        var exports = engine.RunMain("./ModuleRequestedEvent2");
+
+        Assert.Equal("test value", exports.AsString());
+    }
+
+
 }

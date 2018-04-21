@@ -12,6 +12,8 @@ namespace Jint.CommonJS
 
     public class ModuleLoadingEngine
     {
+        public event EventHandler<ModuleRequestedEventArgs> ModuleRequested;
+
         public delegate JsValue FileExtensionParser(string path, IModule module);
 
         public Dictionary<string, IModule> ModuleCache = new Dictionary<string, IModule>();
@@ -110,17 +112,27 @@ namespace Jint.CommonJS
 
         public JsValue Load(string moduleName, Module parent = null)
         {
+            IModule mod;
+
             if (string.IsNullOrEmpty(moduleName))
             {
                 throw new System.ArgumentException("moduleName is required.", nameof(moduleName));
             }
 
-            IModule module = null;
             if (ModuleCache.ContainsKey(moduleName))
             {
-                module = ModuleCache[moduleName];
-                parent.Children.Add(module);
-                return module.Exports;
+                mod = ModuleCache[moduleName];
+                parent.Children.Add(mod);
+                return mod.Exports;
+            }
+
+            var requestedModule = new ModuleRequestedEventArgs(moduleName);
+            ModuleRequested?.Invoke(this, requestedModule);
+
+            if (requestedModule.Exports != null && requestedModule.Exports != JsValue.Undefined)
+            {
+                ModuleCache.Add(moduleName, (mod = new InternalModule(moduleName, requestedModule.Exports)));
+                return mod.Exports;
             }
 
             return new Module(this, moduleName, parent).Exports;
