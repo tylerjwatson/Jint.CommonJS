@@ -12,7 +12,7 @@ namespace Jint.CommonJS
 
     public class ModuleLoadingEngine
     {
-        public event EventHandler<ModuleRequestedEventArgs> ModuleRequested;
+        public static event EventHandler<ModuleRequestedEventArgs> ModuleRequested;
 
         public delegate JsValue FileExtensionParser(string path, IModule module);
 

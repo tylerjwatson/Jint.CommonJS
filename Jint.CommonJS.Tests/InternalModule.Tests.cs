@@ -99,7 +99,7 @@ public class InternalModuleTests
             module.exports = require('{testModuleName}');
         ");
 
-        var eventData = Assert.RaisesAny<ModuleRequestedEventArgs>(e => engine.ModuleRequested += e, e => engine.ModuleRequested -= e, () => {
+        var eventData = Assert.RaisesAny<ModuleRequestedEventArgs>(e => ModuleLoadingEngine.ModuleRequested += e, e => ModuleLoadingEngine.ModuleRequested -= e, () => {
             // An exception is expected here; the RaisesAny method does not assign the exports a value.
             Assert.Throws<FileNotFoundException>(() => engine.RunMain("./ModuleRequestedEvent"));
         });
@@ -119,7 +119,7 @@ public class InternalModuleTests
             module.exports = require('{testModuleName}');
         ");
 
-        engine.ModuleRequested += (sender, args) => {
+        ModuleLoadingEngine.ModuleRequested += (sender, args) => {
             if (args.ModuleId == testModuleName)
             {
                 args.Exports = JsValue.FromObject(engine.engine, "test value");
