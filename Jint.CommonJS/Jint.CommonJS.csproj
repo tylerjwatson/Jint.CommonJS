@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="jint" Version="2.11.58" />
+    <ProjectReference Include="..\..\Jint\Jint\Jint.csproj" />
   </ItemGroup>
 
 </Project>
