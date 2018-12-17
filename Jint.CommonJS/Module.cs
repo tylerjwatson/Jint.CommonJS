@@ -100,7 +100,7 @@ namespace Jint.CommonJS
                     moduleObject,
                     this.Exports,
                     Path.GetDirectoryName(filePath),
-                    new ClrFunctionInstance(this.engine.engine, this.Id, (thisObj, arguments) => Require(arguments.At(0).AsString()))
+                    new ClrFunctionInstance(this.engine.engine, (thisObj, arguments) => Require(arguments.At(0).AsString()))
                     //  new DelegateWrapper(engine.engine, new Func<string, JsValue>(this.Require)),
                     }
                 );
